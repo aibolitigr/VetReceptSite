@@ -2,25 +2,33 @@ from flask import Flask, render_template, request, send_file
 from docx import Document
 from datetime import datetime
 import os
+import re
 
 app = Flask(__name__)
 
+# Словарь русских месяцев
 months_ru = {
     1: "января", 2: "февраля", 3: "марта", 4: "апреля",
     5: "мая", 6: "июня", 7: "июля", 8: "августа",
     9: "сентября", 10: "октября", 11: "ноября", 12: "декабря"
 }
 
+def sanitize_filename(name):
+    """Очистка имени от недопустимых символов"""
+    return re.sub(r'[\\/*?:"<>|]', '', name).strip().replace(' ', '_')
+
 def format_date(date_str):
+    """Форматирование даты в русский формат"""
     try:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         return f"{date_obj.day} {months_ru[date_obj.month]} {date_obj.year} г."
     except (ValueError, KeyError):
         return None
 
-def fill_template(data):
+def fill_template(data, filename):
+    """Заполнение шаблона DOCX"""
     template_path = "template.docx"
-    output_path = "filled_recipe.docx"
+    output_path = os.path.join("temp", filename)
     
     doc = Document(template_path)
     for paragraph in doc.paragraphs:
@@ -36,17 +44,16 @@ def index():
     if request.method == 'POST':
         errors = []
         
-        # Получаем и форматируем даты
+        # Проверка и форматирование дат
         date_formatted = format_date(request.form.get("date"))
         expiry_formatted = format_date(request.form.get("expiry_date"))
         
-        # Валидация дат
+        # Валидация
         if not date_formatted:
             errors.append("Неверная дата оформления рецепта!")
         if not expiry_formatted:
             errors.append("Неверная дата окончания рецепта!")
         
-        # Проверка логики дат
         if date_formatted and expiry_formatted:
             try:
                 date_obj = datetime.strptime(request.form.get("date"), "%Y-%m-%d")
@@ -59,7 +66,27 @@ def index():
         if errors:
             return "<br>".join(errors) + "<br><br><a href='/'>Вернуться к форме</a>"
         
-        # Формируем данные для шаблона
+        # Генерация имени файла
+        owner = request.form.get("owner_name", "").strip()
+        pet = request.form.get("pet_info", "").strip()
+
+        # Извлекаем фамилию (первое слово)
+        surname = owner.split()[0] if owner else "Без_фамилии"
+
+        # Извлекаем кличку (первое слово до запятой или первое слово)
+        if ',' in pet:
+         pet_name = pet.split(',')[0].strip()
+        elif ' ' in pet:
+         pet_name = pet.split()[0].strip()
+        else:
+         pet_name = pet if pet else "Без_клички"
+
+        # Очистка от спецсимволов
+        surname_clean = re.sub(r'[\\/*?:"<>|]', '', surname).replace(' ', '_')
+        pet_clean = re.sub(r'[\\/*?:"<>|]', '', pet_name).replace(' ', '_')
+
+        filename = f"{surname_clean}_{pet_clean}.docx"        
+        # Заполнение данных
         data = {
             "{instance_number}": request.form.get("instance_number"),
             "{recipe_number}": request.form.get("recipe_number"),
@@ -78,11 +105,23 @@ def index():
             "{expiry_date}": expiry_formatted
         }
         
-        docx_path = fill_template(data)
-        return send_file(docx_path, as_attachment=True)
+        # Создание и отправка файла
+        docx_path = fill_template(data, filename)
+        response = send_file(docx_path, as_attachment=True, download_name=filename)
+        
+        # Автоудаление временного файла
+        @response.call_on_close
+        def delete_file():
+            try:
+                os.remove(docx_path)
+            except Exception as e:
+                app.logger.error(f"Ошибка удаления файла: {e}")
+        
+        return response
     
     return render_template('form.html')
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+    app.run(host='0.0.0.0', port=5000, debug=True)
