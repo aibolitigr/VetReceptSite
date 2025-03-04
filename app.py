@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, send_file
 from docx import Document
 import os
-from weasyprint import HTML  # Используем WeasyPrint для конвертации в PDF
+from weasyprint import HTML, CSS  # Используем WeasyPrint для конвертации в PDF
 
 app = Flask(__name__)
 
@@ -28,10 +28,20 @@ def convert_to_pdf(docx_path):
     doc = Document(docx_path)
     html_content = "".join([f"<p>{p.text}</p>" for p in doc.paragraphs])
     with open(html_path, "w", encoding="utf-8") as f:
-        f.write(f"<html><body>{html_content}</body></html>")
+        f.write(f"""
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <style>
+                body {{ font-family: 'DejaVu Sans', sans-serif; }}
+            </style>
+        </head>
+        <body>{html_content}</body>
+        </html>
+        """)
     
     print("[INFO] Конвертация HTML в PDF с помощью WeasyPrint...")
-    HTML(html_path).write_pdf(pdf_path)
+    HTML(html_path).write_pdf(pdf_path, stylesheets=[CSS(string="body { font-family: 'DejaVu Sans', sans-serif; }")])
     
     if os.path.exists(pdf_path):
         print("[INFO] PDF-файл успешно создан:", pdf_path)
