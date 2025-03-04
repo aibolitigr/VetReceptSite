@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, send_file
 from docx import Document
 import os
-import subprocess  # Используем для вызова pandoc
+import subprocess  # Используем для вызова unoconv
 
 app = Flask(__name__)
 
@@ -22,10 +22,10 @@ def fill_template(data):
 
 def convert_to_pdf(docx_path):
     pdf_path = docx_path.replace(".docx", ".pdf")
-    print("[INFO] Конвертация DOCX в PDF с помощью pandoc...")
+    print("[INFO] Конвертация DOCX в PDF с помощью unoconv...")
     
     try:
-        subprocess.run(["pandoc", docx_path, "-o", pdf_path], check=True)
+        subprocess.run(["unoconv", "-f", "pdf", docx_path], check=True)
         print("[INFO] PDF-файл успешно создан:", pdf_path)
         return pdf_path
     except Exception as e:
