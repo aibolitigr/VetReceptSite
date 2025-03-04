@@ -28,8 +28,6 @@ def fill_template(data, filename):
     output_path = os.path.join("temp", filename)
     
     doc = Document(template_path)
-    
-    # Замена плейсхолдеров с сохранением форматирования
     for paragraph in doc.paragraphs:
         for key, value in data.items():
             if key in paragraph.text:
@@ -48,7 +46,6 @@ def index():
         errors = []
         form_data = request.form.to_dict()
         
-        # Валидация дат
         date_formatted = format_date(form_data.get("date"))
         expiry_formatted = format_date(form_data.get("expiry_date"))
         
@@ -69,14 +66,12 @@ def index():
         if errors:
             return render_template('form.html', errors=errors, form_data=form_data)
         
-        # Генерация имени файла
         owner = form_data.get("owner_name", "").strip()
         pet = form_data.get("pet_info", "").strip()
         surname = owner.split()[0] if owner else "Без_фамилии"
         pet_name = pet.split(',')[0].strip() if ',' in pet else pet.split()[0] if pet else "Без_клички"
         filename = f"{sanitize_filename(surname)}_{sanitize_filename(pet_name)}.docx"
         
-        # Формирование данных
         data = {
             "{date}": date_formatted,
             "{owner_name}": form_data.get("owner_name"),
@@ -93,7 +88,6 @@ def index():
             "{expiry_date}": expiry_formatted
         }
         
-        # Создание и отправка файла
         docx_path = fill_template(data, filename)
         response = send_file(docx_path, as_attachment=True, download_name=filename)
         
