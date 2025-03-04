@@ -26,8 +26,11 @@ def format_date(date_str):
         return None
 
 def fill_template(data, filename):
-    """Заполнение шаблона DOCX"""
     template_path = "template.docx"
+    
+    # Создаём папку temp, если её нет
+    os.makedirs("temp", exist_ok=True)
+    
     output_path = os.path.join("temp", filename)
     
     doc = Document(template_path)
