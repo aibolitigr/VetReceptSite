@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, send_file
 from docx import Document
 import os
-import subprocess  # Используем для конвертации DOCX в PDF через LibreOffice
+import requests  # Используем CloudConvert API для конвертации
 
 app = Flask(__name__)
+CLOUDCONVERT_API_KEY = "YOUR_CLOUDCONVERT_API_KEY"  # 🔹 Замени на свой API-ключ
+
 
 def fill_template(data):
     template_path = "template.docx"  # Файл шаблона
@@ -22,19 +24,26 @@ def fill_template(data):
 
 def convert_to_pdf(docx_path):
     pdf_path = docx_path.replace(".docx", ".pdf")
-    print("[INFO] Конвертация DOCX в PDF с помощью LibreOffice...")
+    print("[INFO] Конвертация DOCX в PDF через CloudConvert API...")
+    
+    files = {"file": open(docx_path, "rb")}
+    headers = {"Authorization": f"Bearer {CLOUDCONVERT_API_KEY}"}
     
     try:
-        subprocess.run([
-            "libreoffice", "--headless", "--convert-to", "pdf", docx_path, "--outdir", os.path.dirname(docx_path)
-        ], check=True)
+        response = requests.post("https://api.cloudconvert.com/v2/convert", headers=headers, files=files, data={
+            "inputformat": "docx",
+            "outputformat": "pdf"
+        })
+        response.raise_for_status()
         
-        if os.path.exists(pdf_path):
-            print("[INFO] PDF-файл успешно создан:", pdf_path)
-            return pdf_path
-        else:
-            print("[ERROR] PDF-файл не найден после конвертации!")
-            return None
+        pdf_url = response.json()["data"]["output"]["url"]
+        pdf_response = requests.get(pdf_url)
+        
+        with open(pdf_path, "wb") as f:
+            f.write(pdf_response.content)
+        
+        print("[INFO] PDF-файл успешно загружен:", pdf_path)
+        return pdf_path
     except Exception as e:
         print("[ERROR] Ошибка при конвертации в PDF:", e)
         return None
