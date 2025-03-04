@@ -1,63 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Заполнение рецепта</title>
+    <title>Генератор рецептов</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
         label { display: block; margin-top: 10px; }
-        input { width: 100%; padding: 5px; margin-bottom: 10px; }
-        button { margin-top: 20px; padding: 10px 20px; }
+        input, textarea { width: 100%; padding: 5px; margin-bottom: 10px; }
+        button { margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        .error { color: red; margin: 10px 0; }
+        .error-messages { border: 1px solid #ff0000; padding: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <h2>Введите данные для рецепта</h2>
+    <h2>Заполните данные для рецепта</h2>
+    
+    {% if errors %}
+    <div class="error-messages">
+        {% for error in errors %}
+        <div class="error">⚠️ {{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <form method="POST">
-        <label>Номер экземпляра:</label>
-        <input type="text" name="instance_number" required>
-
-        <label>Номер рецепта:</label>
-        <input type="text" name="recipe_number" required>
-
         <label>Дата оформления:</label>
-        <input type="date" name="date" required>
+        <input type="date" name="date" 
+               value="{{ form_data.date if form_data else '' }}" required>
 
-        <label>ФИО владельца и адрес:</label>
-        <input type="text" name="owner_name" required>
+        <label>ФИО владельца:</label>
+        <input type="text" name="owner_name" 
+               value="{{ form_data.owner_name if form_data else '' }}" required>
 
         <label>Информация о животном:</label>
-        <input type="text" name="pet_info" required>
+        <input type="text" name="pet_info" 
+               value="{{ form_data.pet_info if form_data else '' }}" 
+               placeholder="Кличка, вид, возраст" required>
 
         <label>Название препарата:</label>
-        <input type="text" name="medicine" required>
+        <input type="text" name="medicine" 
+               value="{{ form_data.medicine if form_data else '' }}" required>
 
         <label>Общая доза:</label>
-        <input type="text" name="dosage" required>
+        <input type="text" name="dosage" 
+               value="{{ form_data.dosage if form_data else '' }}" required>
 
         <label>Разовая доза:</label>
-        <input type="text" name="single_dose" required>
+        <input type="text" name="single_dose" 
+               value="{{ form_data.single_dose if form_data else '' }}" required>
 
         <label>Частота приёма:</label>
-        <input type="text" name="frequency" required>
+        <input type="text" name="frequency" 
+               value="{{ form_data.frequency if form_data else '' }}" required>
 
         <label>Время приёма:</label>
-        <input type="text" name="time_of_day" required>
+        <input type="text" name="time_of_day" 
+               value="{{ form_data.time_of_day if form_data else '' }}" required>
 
         <label>Длительность приёма:</label>
-        <input type="text" name="duration" required>
+        <input type="text" name="duration" 
+               value="{{ form_data.duration if form_data else '' }}" required>
 
         <label>Способ введения:</label>
-        <input type="text" name="method" required>
+        <input type="text" name="method" 
+               value="{{ form_data.method if form_data else '' }}" required>
 
         <label>Время приёма относительно еды:</label>
-        <input type="text" name="feeding_time" required>
+        <input type="text" name="feeding_time" 
+               value="{{ form_data.feeding_time if form_data else '' }}" required>
 
-        <label>ФИО ветеринарного врача:</label>
-        <input type="text" name="vet_name" required>
+        <label>ФИО ветеринара:</label>
+        <input type="text" name="vet_name" 
+               value="{{ form_data.vet_name if form_data else '' }}" required>
 
         <label>Срок действия рецепта:</label>
-        <input type="date" name="expiry_date" required>
+        <input type="date" name="expiry_date" 
+               value="{{ form_data.expiry_date if form_data else '' }}" required>
 
-        <button type="submit">Скачать DOCX</button>
+        <button type="submit">Скачать рецепт</button>
     </form>
 </body>
 </html>
