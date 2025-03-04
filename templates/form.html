@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Заполнение рецепта</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+        label { display: block; margin-top: 10px; }
+        input { width: 100%; padding: 5px; margin-bottom: 10px; }
+        button { margin-top: 20px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h2>Введите данные для рецепта</h2>
+    <form method="POST">
+        <label>Номер экземпляра:</label>
+        <input type="text" name="instance_number" required>
+
+        <label>Номер рецепта:</label>
+        <input type="text" name="recipe_number" required>
+
+        <label>Дата оформления:</label>
+        <input type="date" name="date" required>
+
+        <label>ФИО владельца и адрес:</label>
+        <input type="text" name="owner_name" required>
+
+        <label>Информация о животном:</label>
+        <input type="text" name="pet_info" required>
+
+        <label>Название препарата:</label>
+        <input type="text" name="medicine" required>
+
+        <label>Общая доза:</label>
+        <input type="text" name="dosage" required>
+
+        <label>Разовая доза:</label>
+        <input type="text" name="single_dose" required>
+
+        <label>Частота приёма:</label>
+        <input type="text" name="frequency" required>
+
+        <label>Время приёма:</label>
+        <input type="text" name="time_of_day" required>
+
+        <label>Длительность приёма:</label>
+        <input type="text" name="duration" required>
+
+        <label>Способ введения:</label>
+        <input type="text" name="method" required>
+
+        <label>Время приёма относительно еды:</label>
+        <input type="text" name="feeding_time" required>
+
+        <label>ФИО ветеринарного врача:</label>
+        <input type="text" name="vet_name" required>
+
+        <label>Срок действия рецепта:</label>
+        <input type="date" name="expiry_date" required>
+
+        <button type="submit">Скачать DOCX</button>
+    </form>
+</body>
+</html>

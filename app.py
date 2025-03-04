@@ -1,14 +1,27 @@
 from flask import Flask, render_template, request, send_file
 from docx import Document
+from datetime import datetime
 import os
 
 app = Flask(__name__)
 
+months_ru = {
+    1: "января", 2: "февраля", 3: "марта", 4: "апреля",
+    5: "мая", 6: "июня", 7: "июля", 8: "августа",
+    9: "сентября", 10: "октября", 11: "ноября", 12: "декабря"
+}
+
+def format_date(date_str):
+    try:
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        return f"{date_obj.day} {months_ru[date_obj.month]} {date_obj.year} г."
+    except (ValueError, KeyError):
+        return None
+
 def fill_template(data):
-    template_path = "template.docx"  # Файл шаблона
+    template_path = "template.docx"
     output_path = "filled_recipe.docx"
     
-    print("[INFO] Открываем шаблон Word...")
     doc = Document(template_path)
     for paragraph in doc.paragraphs:
         for key, value in data.items():
@@ -16,16 +29,41 @@ def fill_template(data):
                 paragraph.text = paragraph.text.replace(key, value)
     
     doc.save(output_path)
-    print("[INFO] Word-файл сохранён:", output_path)
     return output_path
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        errors = []
+        
+        # Получаем и форматируем даты
+        date_formatted = format_date(request.form.get("date"))
+        expiry_formatted = format_date(request.form.get("expiry_date"))
+        
+        # Валидация дат
+        if not date_formatted:
+            errors.append("Неверная дата оформления рецепта!")
+        if not expiry_formatted:
+            errors.append("Неверная дата окончания рецепта!")
+        
+        # Проверка логики дат
+        if date_formatted and expiry_formatted:
+            try:
+                date_obj = datetime.strptime(request.form.get("date"), "%Y-%m-%d")
+                expiry_obj = datetime.strptime(request.form.get("expiry_date"), "%Y-%m-%d")
+                if expiry_obj < date_obj:
+                    errors.append("Дата окончания не может быть раньше даты оформления!")
+            except ValueError:
+                pass
+        
+        if errors:
+            return "<br>".join(errors) + "<br><br><a href='/'>Вернуться к форме</a>"
+        
+        # Формируем данные для шаблона
         data = {
             "{instance_number}": request.form.get("instance_number"),
             "{recipe_number}": request.form.get("recipe_number"),
-            "{date}": request.form.get("date"),
+            "{date}": date_formatted,
             "{owner_name}": request.form.get("owner_name"),
             "{pet_info}": request.form.get("pet_info"),
             "{medicine}": request.form.get("medicine"),
@@ -37,58 +75,14 @@ def index():
             "{method}": request.form.get("method"),
             "{feeding_time}": request.form.get("feeding_time"),
             "{vet_name}": request.form.get("vet_name"),
-            "{expiry_date}": request.form.get("expiry_date")
+            "{expiry_date}": expiry_formatted
         }
         
         docx_path = fill_template(data)
         return send_file(docx_path, as_attachment=True)
     
-    return '''
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Заполнение рецепта</title>
-    </head>
-    <body>
-        <h2>Введите данные для рецепта</h2>
-        <form method="POST">
-            <label>Номер экземпляра:</label>
-            <input type="text" name="instance_number" required><br>
-            <label>Номер рецепта:</label>
-            <input type="text" name="recipe_number" required><br>
-            <label>Дата:</label>
-            <input type="date" name="date" required><br>
-            <label>ФИО владельца и адрес:</label>
-            <input type="text" name="owner_name" required><br>
-            <label>Информация о животном:</label>
-            <input type="text" name="pet_info" required><br>
-            <label>Название препарата:</label>
-            <input type="text" name="medicine" required><br>
-            <label>Общая доза:</label>
-            <input type="text" name="dosage" required><br>
-            <label>Разовая доза:</label>
-            <input type="text" name="single_dose" required><br>
-            <label>Частота приёма:</label>
-            <input type="text" name="frequency" required><br>
-            <label>Время приёма:</label>
-            <input type="text" name="time_of_day" required><br>
-            <label>Длительность приёма:</label>
-            <input type="text" name="duration" required><br>
-            <label>Способ введения:</label>
-            <input type="text" name="method" required><br>
-            <label>Время приёма относительно еды:</label>
-            <input type="text" name="feeding_time" required><br>
-            <label>ФИО ветеринарного врача:</label>
-            <input type="text" name="vet_name" required><br>
-            <label>Срок действия рецепта:</label>
-            <input type="date" name="expiry_date" required><br>
-            <button type="submit">Скачать DOCX</button>
-        </form>
-    </body>
-    </html>
-    '''
+    return render_template('form.html')
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
