@@ -145,21 +145,11 @@
                 font-size: 16px;
             }
         }
-
-        @media (max-width: 360px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                padding: 15px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📋 Генератор ветеринарных рецептов</h2>
+        <h2>📋 Формуляр рецепта</h2>
         
         {% if errors %}
         <div class="error-messages">
@@ -181,22 +171,22 @@
                    placeholder="Пример: Иванов Иван Сидорович, ул. Центральная 15"
                    required>
 
-            <label>🐕 Информация о животном:</label>
+            <label>🐾 Информация о животном:</label>
             <input type="text" name="pet_info"
                    value="{{ form_data.pet_info if form_data else '' }}"
                    placeholder="Формат: Кличка, вид, возраст (пример: Барсик, кот, 5 лет)"
                    required>
 
-            <label>💊 Название препарата:</label>
+            <label>💊 Название препарата (действующее вещество и торговое название):</label>
             <input type="text" name="medicine"
                    value="{{ form_data.medicine if form_data else '' }}"
                    placeholder="Пример: Амоксициллин 250 мг"
                    required>
 
-            <label>📏 Общая доза:</label>
+            <label>📏 Общая доза (на весь курс):</label>
             <input type="text" name="dosage"
                    value="{{ form_data.dosage if form_data else '' }}"
-                   placeholder="Пример: 500 мг/сутки"
+                   placeholder="Пример: 2000 мг на весь курс"
                    required>
 
             <label>💊 Разовая доза:</label>
@@ -217,7 +207,7 @@
                    placeholder="Пример: Утро, обед, вечер"
                    required>
 
-            <label>📅 Длительность приёма:</label>
+            <label>📆 Длительность приёма:</label>
             <input type="text" name="duration"
                    value="{{ form_data.duration if form_data else '' }}"
                    placeholder="Пример: 7 дней"
@@ -235,7 +225,7 @@
                    placeholder="Пример: За 30 минут до еды"
                    required>
 
-            <label>👨⚕ ФИО ветеринара:</label>
+            <label>👨⚕ ФИО врача:</label>
             <input type="text" name="vet_name"
                    value="{{ form_data.vet_name if form_data else '' }}"
                    placeholder="Пример: Петрова Мария Ивановна"
@@ -247,7 +237,7 @@
                    required>
 
             <button type="submit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Скачать рецепт
             </button>
         </form>
