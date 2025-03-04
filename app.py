@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, send_file
 from docx import Document
 import os
-import comtypes.client  # Используем для конвертации Word в PDF (Windows)
-import pythoncom  # Нужно для CoInitialize()
-import time  # Добавляем задержку
+import subprocess  # Используем для вызова pandoc
 
 app = Flask(__name__)
 
@@ -23,28 +21,13 @@ def fill_template(data):
     return output_path
 
 def convert_to_pdf(docx_path):
+    pdf_path = docx_path.replace(".docx", ".pdf")
+    print("[INFO] Конвертация DOCX в PDF с помощью pandoc...")
+    
     try:
-        pdf_path = docx_path.replace(".docx", ".pdf")
-        print("[INFO] Начинаем конвертацию в PDF...")
-        
-        pythoncom.CoInitialize()  # Инициализируем COM
-        word = comtypes.client.CreateObject("Word.Application")
-        word.Visible = False  # Не показывать окно Word
-        doc = word.Documents.Open(os.path.abspath(docx_path))
-        
-        doc.SaveAs(os.path.abspath(pdf_path), FileFormat=17)  # 17 = wdFormatPDF
-        doc.Close()
-        
-        time.sleep(2)  # Добавляем задержку перед закрытием Word
-        word.Quit()
-        pythoncom.CoUninitialize()  # Завершаем COM
-        
-        if os.path.exists(pdf_path):
-            print("[INFO] PDF-файл успешно создан:", pdf_path)
-            return pdf_path
-        else:
-            print("[ERROR] PDF-файл не найден после конвертации!")
-            return None
+        subprocess.run(["pandoc", docx_path, "-o", pdf_path], check=True)
+        print("[INFO] PDF-файл успешно создан:", pdf_path)
+        return pdf_path
     except Exception as e:
         print("[ERROR] Ошибка при конвертации в PDF:", e)
         return None

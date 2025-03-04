@@ -1,4 +1,0 @@
-flask
-python-docx
-comtypes
-pywin32
