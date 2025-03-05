@@ -1,142 +1,160 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Генератор рецептов</title>
     <style>
-        :root {
-            --primary-color: #4CAF50;
-            --error-color: #ff4444;
-            --text-color: #2c3e50;
-            --border-color: #bdc3c7;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.4;
-            padding: 10px;
-            background: #f8f9fa;
-        }
-
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-
         h2 {
-            color: var(--text-color);
-            margin: 0 0 1rem 0;
-            font-size: 1.4rem;
+            color: #2c3e50;
             text-align: center;
+            margin-bottom: 25px;
         }
-
-        .error-messages {
-            background: #ffe6e6;
-            border: 1px solid var(--error-color);
-            border-radius: 4px;
-            padding: 8px;
-            margin-bottom: 12px;
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .error {
-            color: var(--error-color);
-            margin: 3px 0;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .error::before {
-            content: '⚠️';
-            font-size: 0.9em;
-        }
-
         label {
             display: block;
-            margin: 6px 0 2px;
-            color: var(--text-color);
+            margin: 15px 0 5px;
+            color: #34495e;
             font-weight: 600;
-            font-size: 0.9rem;
         }
-
         input {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            background: #fff;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 16px;
         }
-
         input:focus {
-            border-color: var(--primary-color);
+            border-color: #4CAF50;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
         }
-
-        input::placeholder {
-            color: #95a5a6;
-            font-style: italic;
-            font-size: 0.85rem;
-        }
-
         button {
             width: 100%;
-            padding: 10px;
-            background: var(--primary-color);
+            padding: 12px;
+            background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
-            margin-top: 12px;
-            transition: background 0.2s;
+            margin-top: 20px;
+            transition: background 0.3s;
         }
-
         button:hover {
             background: #45a049;
         }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 12px;
-            }
-            
-            h2 {
-                font-size: 1.3rem;
-            }
+        .error-messages {
+            background: #ffe6e6;
+            border: 1px solid #ff4444;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #ff4444;
+            margin: 8px 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>📋 Ветеринарный рецепт</h2>
-        
-        {% if errors %}
-        <div class="error-messages">
-            {% for error in errors %}
-            <div class="error">{{ error }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <form method="POST">
-            <!-- Все поля формы (как в предыдущих версиях) -->
-            ...
-        </form>
+    <h2>📋 Введите данные для рецепта</h2>
+    
+    {% if errors %}
+    <div class="error-messages">
+        {% for error in errors %}
+        <div class="error">⚠️ {{ error }}</div>
+        {% endfor %}
     </div>
+    {% endif %}
+
+    <form method="POST">
+        <label>📅 Дата оформления:</label>
+        <input type="date" name="date" value="{{ form_data.date if form_data else '' }}" required>
+
+        <label>👤 ФИО владельца:</label>
+        <input type="text" name="owner_name" 
+               value="{{ form_data.owner_name if form_data else '' }}" 
+               placeholder="Иванов Иван Иванович" 
+               required>
+
+        <label>🐾 Информация о животном:</label>
+        <input type="text" name="pet_info" 
+               value="{{ form_data.pet_info if form_data else '' }}" 
+               placeholder="Кличка, вид, возраст (пример: Барсик, кот, 5 лет)" 
+               required>
+
+        <label>💊 Название препарата:</label>
+        <input type="text" name="medicine" 
+               value="{{ form_data.medicine if form_data else '' }}" 
+               placeholder="Амоксициллин 250 мг" 
+               required>
+
+        <label>📏 Общая доза:</label>
+        <input type="text" name="dosage" 
+               value="{{ form_data.dosage if form_data else '' }}" 
+               placeholder="2000 мг на весь курс" 
+               required>
+
+        <label>💊 Разовая доза:</label>
+        <input type="text" name="single_dose" 
+               value="{{ form_data.single_dose if form_data else '' }}" 
+               placeholder="100 мг за приём" 
+               required>
+
+        <label>⏱ Частота приёма:</label>
+        <input type="text" name="frequency" 
+               value="{{ form_data.frequency if form_data else '' }}" 
+               placeholder="3 раза в день" 
+               required>
+
+        <label>⏰ Время приёма:</label>
+        <input type="text" name="time_of_day" 
+               value="{{ form_data.time_of_day if form_data else '' }}" 
+               placeholder="8:00, 14:00, 20:00" 
+               required>
+
+        <label>📅 Длительность приёма:</label>
+        <input type="text" name="duration" 
+               value="{{ form_data.duration if form_data else '' }}" 
+               placeholder="7 дней" 
+               required>
+
+        <label>💉 Способ введения:</label>
+        <input type="text" name="method" 
+               value="{{ form_data.method if form_data else '' }}" 
+               placeholder="Перорально" 
+               required>
+
+        <label>🍽 Время приёма относительно еды:</label>
+        <input type="text" name="feeding_time" 
+               value="{{ form_data.feeding_time if form_data else '' }}" 
+               placeholder="За 30 минут до еды" 
+               required>
+
+        <label>👨⚕ ФИО ветеринара:</label>
+        <input type="text" name="vet_name" 
+               value="{{ form_data.vet_name if form_data else '' }}" 
+               placeholder="Петрова Мария Ивановна" 
+               required>
+
+        <label>⏳ Срок действия рецепта:</label>
+        <input type="date" name="expiry_date" 
+               value="{{ form_data.expiry_date if form_data else '' }}" 
+               required>
+
+        <button type="submit">💾 Скачать рецепт</button>
+    </form>
 </body>
 </html>
