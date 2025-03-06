@@ -3,8 +3,20 @@ from docx import Document
 from datetime import datetime
 import os
 import re
+import logging
+import time
 
 app = Flask(__name__)
+
+# Настройка логирования
+app.logger.setLevel(logging.DEBUG)
+
+# Установка часового пояса
+os.environ['TZ'] = 'Europe/Moscow'
+try:
+    time.tzset()
+except AttributeError:
+    pass  # Для Windows это не требуется
 
 months_ru = {
     1: "января", 2: "февраля", 3: "марта", 4: "апреля",
@@ -13,7 +25,9 @@ months_ru = {
 }
 
 def sanitize_filename(name):
-    return re.sub(r'[\\/*?:"<>|]', '', name).strip().replace(' ', '_')
+    clean_name = re.sub(r'[\\/*?:"<>|]', '', name)
+    clean_name = clean_name.strip().replace(' ', '_')
+    return clean_name if clean_name else "unnamed"
 
 def format_date(date_str):
     try:
@@ -24,13 +38,13 @@ def format_date(date_str):
 
 def fill_template(data):
     template_path = "template.docx"
-    output_path = "filled_recipe.docx"
+    output_path = "/tmp/filled_recipe.docx"  # Для Render
     
     doc = Document(template_path)
     for paragraph in doc.paragraphs:
         for key, value in data.items():
             if key in paragraph.text:
-                paragraph.text = paragraph.text.replace(key, value)
+                paragraph.text = paragraph.text.replace(key, str(value))
     
     doc.save(output_path)
     return output_path
@@ -41,29 +55,67 @@ def index():
         errors = []
         form_data = request.form.to_dict()
         
-        # Валидация дат
-        date_formatted = format_date(form_data.get("date"))
-        expiry_formatted = format_date(form_data.get("expiry_date"))
+        # Проверка обязательных полей
+        required_fields = [
+            'date', 'expiry_date', 'owner_name', 'pet_info',
+            'medicine', 'dosage', 'single_dose', 'frequency',
+            'time_of_day', 'duration', 'method', 'feeding_time', 'vet_name'
+        ]
         
-        # Проверка ошибок
-        if not date_formatted:
-            errors.append("Неверная дата оформления!")
-        if not expiry_formatted:
-            errors.append("Неверная дата окончания!")
+        for field in required_fields:
+            if not form_data.get(field):
+                errors.append(f"Поле {field.replace('_', ' ')} обязательно для заполнения!")
+
+        # Обработка дат
+        date_str = form_data.get("date")
+        expiry_str = form_data.get("expiry_date")
         
-        if date_formatted and expiry_formatted:
-            try:
-                date_obj = datetime.strptime(form_data.get("date"), "%Y-%m-%d")
-                expiry_obj = datetime.strptime(form_data.get("expiry_date"), "%Y-%m-%d")
-                if expiry_obj < date_obj:
-                    errors.append("Дата окончания не может быть раньше оформления!")
-            except ValueError:
-                pass
+        date_formatted = format_date(date_str) if date_str else None
+        expiry_formatted = format_date(expiry_str) if expiry_str else None
+        
+        if date_str and not date_formatted:
+            errors.append("Неверный формат даты оформления!")
+        if expiry_str and not expiry_formatted:
+            errors.append("Неверный формат даты окончания!")
+        
+        # Сравнение дат
+        try:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d") if date_str else None
+            expiry_obj = datetime.strptime(expiry_str, "%Y-%m-%d") if expiry_str else None
+            if date_obj and expiry_obj and expiry_obj < date_obj:
+                errors.append("Дата окончания не может быть раньше оформления!")
+        except ValueError:
+            pass
         
         if errors:
             return render_template('form.html', errors=errors, form_data=form_data)
         
-        # Формирование данных для шаблона
+        # Формирование имени файла
+        owner = form_data.get("owner_name", "").strip()
+        pet = form_data.get("pet_info", "").strip()
+        
+        # Извлечение фамилии
+        surname_parts = owner.split()
+        surname = sanitize_filename(surname_parts[0]) if surname_parts else "Без_фамилии"
+        
+        # Извлечение клички
+        pet_name = "Без_клички"
+        if pet:
+            if ',' in pet:
+                parts = pet.split(',', 1)
+                pet_name = parts[1].split(',')[0].strip() if len(parts) > 1 else parts[0].strip()
+            else:
+                pet_name = pet.split()[0].strip()
+            pet_name = sanitize_filename(pet_name)
+        
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        filename = f"{pet_name}_{surname}_{current_date}.docx"
+        
+        app.logger.debug(f"Generated filename: {filename}")
+        app.logger.debug(f"Owner: {owner} → Surname: {surname}")
+        app.logger.debug(f"Pet: {pet} → Pet name: {pet_name}")
+
+        # Данные для замены
         data = {
             "{date}": date_formatted,
             "{owner_name}": form_data.get("owner_name"),
@@ -81,10 +133,10 @@ def index():
         }
         
         docx_path = fill_template(data)
-        return send_file(docx_path, as_attachment=True)
+        return send_file(docx_path, as_attachment=True, download_name=filename)
     
     return render_template('form.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
