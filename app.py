@@ -90,26 +90,20 @@ def index():
         if errors:
             return render_template('form.html', errors=errors, form_data=form_data)
         
-        # Формирование имени файла
+                # Формирование имени файла (только фамилия и дата)
         owner = form_data.get("owner_name", "").strip()
-        pet = form_data.get("pet_info", "").strip()
         
         # Извлечение фамилии
         surname_parts = owner.split()
         surname = sanitize_filename(surname_parts[0]) if surname_parts else "Без_фамилии"
         
-        # Извлечение клички
-        pet_name = "Без_клички"
-        if pet:
-            if ',' in pet:
-                parts = pet.split(',', 1)
-                pet_name = parts[1].split(',')[0].strip() if len(parts) > 1 else parts[0].strip()
-            else:
-                pet_name = pet.split()[0].strip()
-            pet_name = sanitize_filename(pet_name)
+        # Проверка фамилии
+        if not surname or surname == "Без_фамилии":
+            errors.append("Фамилия владельца обязательна!")
         
-        current_date = datetime.now().strftime("%Y-%m-%d")
-        filename = f"{pet_name}_{surname}_{current_date}.docx"
+        # Формат даты: DD-MM-YYYY
+        current_date = datetime.now().strftime("%d-%m-%Y")
+        filename = f"{surname}_{current_date}.docx"
         
         app.logger.debug(f"Generated filename: {filename}")
         app.logger.debug(f"Owner: {owner} → Surname: {surname}")
