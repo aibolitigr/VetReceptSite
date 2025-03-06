@@ -190,34 +190,34 @@
             <input type="date" name="date" required 
                    value="{{ form_data.date if form_data else '' }}">
 
-            <label>👤 ФИО владельца:</label>
+            <label>👤 ФИО владельца, адрес регистрации:</label>
             <input type="text" name="owner_name" 
                    value="{{ form_data.owner_name if form_data else '' }}" 
-                   placeholder="Иванов Иван Иванович" required 
+                   placeholder="Иванов Иван Иванович, город Иваново ул. Ивановская д. 10\2-134" required 
                    autocapitalize="words">
 
             <label>🐾 Информация о животном:</label>
             <input type="text" name="pet_info" 
                    value="{{ form_data.pet_info if form_data else '' }}" 
-                   placeholder="Порода, кличка, возраст (пример: Собака, Шарик, 5 лет)" required>
+                   placeholder="Кличка, порода, возраст (пример: Матильда, сука, 5 лет)" required>
 
-            <label>💊 Лекарство:</label>
+            <label>💊 Лекарственный препарат (действующее вещество и торговое название):</label>
             <input type="text" name="medicine" 
                    value="{{ form_data.medicine if form_data else '' }}" 
-                   placeholder="Амоксициллин" required>
+                   placeholder="Амоксициллин 200 мг. клавуановая кислота 50 мг. (синулокс или кладакса)" required>
 
-            <label>📏 Дозировка (мг/кг):</label>
+            <label>📏 Дозировка (общая на весь курс):</label>
             <input type="text" name="dosage" 
                    value="{{ form_data.dosage if form_data else '' }}" 
-                   placeholder="10" required 
+                   placeholder="5000 мг." required 
                    inputmode="numeric">
 
             <label>💧 Разовая доза:</label>
             <input type="text" name="single_dose" 
                    value="{{ form_data.single_dose if form_data else '' }}" 
-                   placeholder="2 мл" required>
+                   placeholder="250 мг." required>
 
-            <label>🔄 Частота приёма:</label>
+            <label>🔄 Кратность приёма (как часто давать):</label>
             <input type="text" name="frequency" 
                    value="{{ form_data.frequency if form_data else '' }}" 
                    placeholder="2 раза в день" required>
@@ -225,31 +225,31 @@
             <label>⏱️ Время приёма:</label>
             <input type="text" name="time_of_day" 
                    value="{{ form_data.time_of_day if form_data else '' }}" 
-                   placeholder="Утро/вечер" required>
+                   placeholder="Утром и вечером или в  9 00 и в 21 00" required>
 
-            <label>📅 Срок лечения:</label>
+            <label>📅 Курс лечения (сколько дней):</label>
             <input type="text" name="duration" 
                    value="{{ form_data.duration if form_data else '' }}" 
-                   placeholder="7 дней" required>
+                   placeholder="10 дней" required>
 
             <label>📝 Способ применения:</label>
             <input type="text" name="method" 
                    value="{{ form_data.method if form_data else '' }}" 
-                   placeholder="Перорально" required>
+                   placeholder="Перорально/внутримышечно/внутривенно/местно/интраназально и т.д." required>
 
-            <label>⏰ Время кормления:</label>
+            <label>⏰ Когда давать относительно еды:</label>
             <input type="text" name="feeding_time" 
                    value="{{ form_data.feeding_time if form_data else '' }}" 
-                   placeholder="После еды" required>
+                   placeholder="После еды/с едой/натощак/ за 30 минут до еды " required>
 
             <label>📅 Дата окончания действия:</label>
             <input type="date" name="expiry_date" 
                    value="{{ form_data.expiry_date if form_data else '' }}" required>
 
-            <label>🩺 ФИО ветеринара:</label>
+            <label>🩺 ФИО врача:</label>
             <input type="text" name="vet_name" 
                    value="{{ form_data.vet_name if form_data else '' }}" 
-                   placeholder="Петрова Анна Александровна" required 
+                   placeholder="Иванов Иван Иванович" required 
                    autocapitalize="words">
 
             <button type="submit">💾 Скачать</button>
