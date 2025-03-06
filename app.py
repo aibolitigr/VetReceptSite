@@ -105,9 +105,9 @@ def index():
         current_date = datetime.now().strftime("%d-%m-%Y")
         filename = f"{surname}_{current_date}.docx"
         
+        # Логирование
         app.logger.debug(f"Generated filename: {filename}")
-        app.logger.debug(f"Owner: {owner} → Surname: {surname}")
-        app.logger.debug(f"Pet: {pet} → Pet name: {pet_name}")
+        app.logger.debug(f"Owner: {owner} → Surname: {surname}")  # Только это!
 
         # Данные для замены
         data = {
