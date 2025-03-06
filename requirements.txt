@@ -1,4 +1,4 @@
-﻿flask>=3.0.2
-werkzeug>=3.0.1
-python-docx>=0.8.11
-gunicorn==21.2.0
+﻿flask==3.0.2
+werkzeug==3.0.1
+python-docx==0.8.11
+gunicorn==21.2.0  # Обязательно!
